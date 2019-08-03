@@ -1,0 +1,58 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>
+      Does per capita CO2 increase correspond to increase in Life Expectancy?
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-grid>
+    <ion-row>
+      <ion-col size="2">
+      </ion-col>
+      <ion-col size="8">  
+        <div class="ion-padding">
+        </div>
+
+        <div style="margin-left: 5px">
+            <ion-button *ngIf="!animationInProgress" (click)="onChangeText()">
+                Restart animation
+                <ion-icon name="refresh"></ion-icon>
+              </ion-button>
+        </div>
+
+        <ion-card>
+          
+              
+          <ion-card-header>
+            
+              <ion-card-title>
+                  Year {{year}} 
+              </ion-card-title>
+          </ion-card-header>
+        
+          <ion-card-content>
+
+            <ion-range min="1960" max="2018" step="1" snaps="true" ticks="true" [(ngModel)]="year" (ionChange)="reAnimate()"></ion-range>
+            
+            <ion-segment [(ngModel)]="activeRegion">
+                <ion-segment-button value="all" (click)="filterRegions('all')" selected>
+                    All
+                </ion-segment-button>
+                <ion-segment-button *ngFor="let region of regionsMaster" value={{region}} (click)="filterRegions(region)">
+                    <ion-icon name="square" [style.color]=c[region]></ion-icon>
+                    {{regionsMasterComp[region]}}
+                </ion-segment-button>
+              </ion-segment>
+
+            <svg width="100%" height="600px" id="plot1">
+            </svg>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+      <ion-col size="2">
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-content>
