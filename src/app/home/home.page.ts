@@ -21,11 +21,12 @@ export class HomePage {
   originalDatasetCountryCodes: string[];
   tooltipDiv: d3.Selection<HTMLDivElement, unknown, HTMLElement, any>;
   clsreg: { 'East Asia & Pacific': string; 'Europe & Central Asia': string; 'Latin America & Caribbean': string; 'Middle East & North Africa': string; 'North America': string; 'South Asia': string; 'Sub-Saharan Africa': string; };
-  activeRegion: string = "all";
+  activeRegion = 'all';
   regionsMaster: string[];
   regionsMasterComp: { 'East Asia & Pacific': string; 'Europe & Central Asia': string; 'Latin America & Caribbean': string; 'Middle East & North Africa': string; 'North America': string; 'South Asia': string; 'Sub-Saharan Africa': string; };
-  animationInProgress: boolean = false;
-  consent: boolean = false;
+  animationInProgress = false;
+  consent = false;
+  labels: any;
   constructor(private databaseService: DatabaseService) { }
   text = 'Default starting text';
 
@@ -77,19 +78,27 @@ export class HomePage {
     return d.Region.replace(/\s/g, '');
   }
 
-  filterRegions(ar){
+  filterRegions(ar) {
     this.activeRegion = ar;
-    console.warn("Region:::", this.activeRegion);
-    let self = this;
+    const self = this;
 
-    if(this.activeRegion == "all") {
+    if (this.activeRegion == 'all') {
       d3.selectAll('circle.dataPointz')
       .attr('opacity', 1);
-    }
-    else {
+      d3.selectAll('text.labels')
+      .attr('opacity', 1);
+    } else {
       d3.selectAll('circle.dataPointz')
       .attr('opacity', function(d: { 'CO2': number; 'Life': number; 'Population': number; 'Code': string; 'Name': string; 'IGroup': string; 'Region': string; 'Year': number; }, i) {
-        if(d.Region == self.activeRegion) {
+        if (d.Region == self.activeRegion) {
+          return 1;
+        } else {
+          return 0;
+        }
+      });
+      d3.selectAll('text.labels')
+      .attr('opacity', function(d: { 'CO2': number; 'Life': number; 'Population': number; 'Code': string; 'Name': string; 'IGroup': string; 'Region': string; 'Year': number; }, i) {
+        if (d.Region == self.activeRegion) {
           return 1;
         } else {
           return 0;
@@ -105,7 +114,7 @@ export class HomePage {
 
     const marginOffset = 40;
 
-    this.activeRegion = "all";
+    this.activeRegion = 'all';
 
     this.minCO2 = 0.005;
     this.maxCO2 = 45;
@@ -230,13 +239,26 @@ export class HomePage {
 
     d3.selectAll('.graphOrigin').html('');
 
+
+    const priorityData = (self = this) => {
+      self.originalDataset.sort((a, b) => -a.Population+b.Population);
+      
+      return self.originalDataset.filter(d => d.Region == self.regionsMaster[0]).slice(0, 3)
+      .concat(self.originalDataset.filter(d => d.Region == self.regionsMaster[1]).slice(0, 3))
+      .concat(self.originalDataset.filter(d => d.Region == self.regionsMaster[2]).slice(0, 3))
+      .concat(self.originalDataset.filter(d => d.Region == self.regionsMaster[3]).slice(0, 3))
+      .concat(self.originalDataset.filter(d => d.Region == self.regionsMaster[4]).slice(0, 3))
+      .concat(self.originalDataset.filter(d => d.Region == self.regionsMaster[5]).slice(0, 3))
+      .concat(self.originalDataset.filter(d => d.Region == self.regionsMaster[6]).slice(0, 3));
+    }
+
     this.circles = this.graphOrigin.selectAll('circle')
       .data(this.originalDataset)
       .enter()
       .append('circle')
       .attr('opacity', 1)
       .attr('class', function(d, i) {
-        return d.Code + " " + self.clsreg[d.Region] + " dataPointz";
+        return d.Code + ' ' + self.clsreg[d.Region] + ' dataPointz';
       })
       .attr('r', function(d, i) {
         return self.r(d.Population);
@@ -276,6 +298,21 @@ export class HomePage {
             .attr('stroke', self.c[d.Region])
             .attr('stroke-width', 1);
       });
+
+    this.labels = this.graphOrigin.selectAll('text.labels')
+      .data(priorityData)
+      .enter()
+      .append('text')
+      .attr('class', 'labels')
+      .attr('x', (d, i) => {
+        return self.x(d.CO2) - 10;
+      })
+      .attr('y', (d, i) => {
+        return self.y(d.Life) + 5;
+      })
+      .attr('dy', '0.1em')
+      .attr('fill', 'black')
+      .text(d => d.Code);
   }
 
   populateTooltip(d) {
@@ -297,7 +334,7 @@ export class HomePage {
       </tr>';
     });
     const rowData = rows.join(' ');
-    return '<table class=\'popupTable\'>'+ rowData + "</table>";
+    return '<table class=\'popupTable\'>' + rowData + '</table>';
   }
 
   reAnimate() {
@@ -341,6 +378,15 @@ export class HomePage {
       })
       .attr('cy', function(d, i) {
         return self.y(getDataForCode(d.Code).Life);
+      });
+
+    this.labels
+      .transition()
+      .attr('x', (d, i) => {
+        return self.x(getDataForCode(d.Code).CO2) - 10;
+      })
+      .attr('y', (d, i) => {
+        return self.y(getDataForCode(d.Code).Life) + 5;
       });
   }
 
