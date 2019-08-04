@@ -1,7 +1,7 @@
 <ion-header>
   <ion-toolbar>
     <ion-title>
-      Does per capita CO2 increase correspond to increase in Life Expectancy?
+      Correlation between CO2 Per Capita vs Life Expectancy
     </ion-title>
   </ion-toolbar>
 </ion-header>
@@ -15,14 +15,35 @@
         <div class="ion-padding">
         </div>
 
-        <div style="margin-left: 5px">
-            <ion-button *ngIf="!animationInProgress" (click)="onChangeText()">
+        <ion-card>
+          
+              
+            <ion-card-header>
+              
+          <ion-card-title>
+              The premise
+            </ion-card-title>
+            </ion-card-header>
+          <ion-card-content>
+              In this narrative visualization, the author explores if there is a correlation between per capita CO2 emissions of a country and the life expectancy of its people. Each individual  data point corresponds to the data associated with a country, color coded to reflect its region and whose size is proportional to its population. Hover over the data points to learn more about the country.
+          </ion-card-content>
+        </ion-card>
+
+    <div style="margin-left: 13px" *ngIf="!consent">
+        <ion-button (click)="letsGo()">
+            Let's go!
+          </ion-button>
+    </div>
+
+    <div [style.visibility]="consent ? 'visible' : 'hidden'">
+        <div style="margin-left: 13px">
+            <ion-button *ngIf="!animationInProgress && consent" (click)="onChangeText()">
                 Restart animation
                 <ion-icon name="refresh"></ion-icon>
               </ion-button>
         </div>
-
-        <ion-card>
+    
+        <ion-card >
           
               
           <ion-card-header>
@@ -33,7 +54,7 @@
           </ion-card-header>
         
           <ion-card-content>
-
+    
             <ion-range min="1960" max="2018" step="1" snaps="true" ticks="true" [(ngModel)]="year" (ionChange)="reAnimate()"></ion-range>
             
             <ion-segment [(ngModel)]="activeRegion">
@@ -45,11 +66,14 @@
                     {{regionsMasterComp[region]}}
                 </ion-segment-button>
               </ion-segment>
-
+    
             <svg width="100%" height="600px" id="plot1">
             </svg>
           </ion-card-content>
         </ion-card>
+            
+    </div>
+
       </ion-col>
       <ion-col size="2">
       </ion-col>

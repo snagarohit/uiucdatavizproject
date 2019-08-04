@@ -24,7 +24,8 @@ export class HomePage {
   activeRegion: string = "all";
   regionsMaster: string[];
   regionsMasterComp: { 'East Asia & Pacific': string; 'Europe & Central Asia': string; 'Latin America & Caribbean': string; 'Middle East & North Africa': string; 'North America': string; 'South Asia': string; 'Sub-Saharan Africa': string; };
-  animationInProgress: boolean;
+  animationInProgress: boolean = false;
+  consent: boolean = false;
   constructor(private databaseService: DatabaseService) { }
   text = 'Default starting text';
 
@@ -39,6 +40,11 @@ export class HomePage {
   c: any;
 
   async onChangeText() {
+    await this.startNarration();
+  }
+
+  async letsGo() {
+    this.consent = true;
     await this.startNarration();
   }
 
@@ -82,7 +88,7 @@ export class HomePage {
     }
     else {
       d3.selectAll('circle.dataPointz')
-      .attr('opacity', function(d, i) {
+      .attr('opacity', function(d: { 'CO2': number; 'Life': number; 'Population': number; 'Code': string; 'Name': string; 'IGroup': string; 'Region': string; 'Year': number; }, i) {
         if(d.Region == self.activeRegion) {
           return 1;
         } else {
@@ -373,10 +379,7 @@ export class HomePage {
   }
 
   async animate(self) {
-    this.animationInProgress = true;
     this.initDraw();
-    await this.delay(1000);
-    await this.onChangeText();
   }
 
 
